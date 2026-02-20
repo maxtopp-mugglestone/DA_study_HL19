@@ -25,15 +25,24 @@ git submodule update --init --recursive
 ```
 ### Python installation
 
-1) You can create a miniforge environment, look for instructions: https://github.com/conda-forge/miniforge. Then you need to activate the environment in general -> source miniforge/bin/activate.
+1) You can create a miniforge environment, look for instructions: https://github.com/conda-forge/miniforge.
+Or use:
+```
+cd
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+bash Miniforge3-Linux-x86_64.sh -b  -p ./miniforge -f
+rm -f Miniforge3-Linux-x86_64.sh
+source miniforge/bin/activate
+```
 
-2) In the example_DA_study repository there is a file requirements.txt 
+4) In the example_DA_study repository there is a file requirements.txt 
 
 Manual packages installation:
 
 ```bash
 pip install -r requirements.txt
 ```
+
 3) Then we need to zip the envirnment for easier transfer later to the nodes.
 Use:
 ```bash
@@ -106,7 +115,7 @@ In the repository studies/scripts/ you need to modify the config.yaml.
 
 ## Running the study
 
-### Change the parameters in studies/scripts/1_create_study.py
+- Change the parameters in studies/scripts/1_create_study.py
 
 1) Inside you have the optics, octupoles, tunes etc. You can run tune scans for example by changing
 ```
@@ -116,7 +125,7 @@ array_qy = np.round(np.arange(60.305, 60.330, 0.001), decimals=4)
 2) Then you run this script and it will create folders in studies/scan/example_tunescan/base_collider/
 There are multiple jobs with mutated configs with some of the tunes you want to scan.
 
-3) Now we can launch the study. Run in studies/scripts 2_run_jobs.py.
+3) Now we can launch the study. We need to run Run studies/scripts/2_run_jobs.py two times!
    It constists of 2 generations: The first launch is going to build the basic collider that will be stored in the folder studies/scan/example_tunescan/base_collider/. After it is completed, run studies/scripts 2_run_jobs.py again! This launches the second generation and the real study.
 
 4) The output_particles.parquet file is the result of studies/scripts 2_run_jobs.py running properly stored in studies/scan/example_tunescan/base_collider/xtrack_0000 - xtrack_9999.
