@@ -127,6 +127,8 @@ Some jobs are not going to run and it is normal! The tunes or in general paramet
 
 6) Plot the results example DA vs tune: folder my_scripts contains a DA_plot.py.
 
+
+UNTIL HERE
 ### Installing with Poetry SKIP THIS IF YOU INSTALL WITHOUT POETRY!
 
 If not already done, install Poetry following the tutorial [here](https://python-poetry.org/docs/). Note that Poetry must have access to Python 3.9 or above for the rest of the tutorial to work. More importantly, the executable of Python must be accessible from a cluster node (e.g. located on AFS when submitting jobs to HTCondor) for a submission to work. Ideally, Poetry should use a Python distribution located on your local machine (shared acress all of your projects), and then use another Python distribution (e.g. miniforge or miniconda) on AFS for the simulations (which can be shared across projects or not, depending on the needs).
