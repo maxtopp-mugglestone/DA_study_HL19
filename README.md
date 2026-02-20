@@ -23,8 +23,111 @@ If you missed this step and clone the repository without the submodules, you can
 ```bash
 git submodule update --init --recursive
 ```
+### Python installation
 
-### Installing with Poetry
+1) You can create a miniforge environment, look for instructions: https://github.com/conda-forge/miniforge. Then you need to activate the environment in general -> source miniforge/bin/activate.
+
+2) In the example_DA_study repository there is a file requirements.txt 
+
+Manual packages installation:
+
+```bash
+pip install -r requirements.txt
+```
+3) Then we need to zip the envirnment for easier transfer later to the nodes.
+Use:
+```bash
+pip install conda-pack
+conda-pack miniforge envs.tar.gz (The name of the folder where your environment is stored. If you are using eos store it there! NOT on AFS please!)
+```
+
+Then you should be set.
+
+### Paths modification
+
+In the repository studies/scripts/ you need to modify the config.yaml. 
+
+```
+"root":
+  setup_env_script: "none"
+  # Following parameter is ignored when run_on is not htc_docker or slurm_docker
+  singularity_image: "/cvmfs/unpacked.cern.ch/gitlab-registry.cern.ch/cdroin/da-study-docker:74ed75ec"
+  # use_eos_for_large_files: true
+  eos_python: "root://eosuser.cern.ch//eos/user/a/aradosla/envs/envs.tar.gz" # PUT YOUR python path
+  generations:
+    1: # Build the particle distribution and base collider
+      job_folder: "../../template_jobs/1_build_distr_and_collider"
+      job_executable: 1_build_distr_and_collider.py
+      files_to_clone: # relative to the template folder
+        - optics_specific_tools.py
+      files_to_copy_node:
+        - 1_build_distr_and_collider.py
+        - config.yaml
+        - optics_specific_tools.py
+        - "/afs/cern.ch/work/a/aradosla/private/example_DA_study_50Hz/studies/optics/optics.zip"  # Generally you need a zipped optics.zip, in the current setup you can remove this line. The optics files are in: /afs/cern.ch/eng/lhc/optics/runIII/RunIII_dev/Proton_2025/NomH_RPV/opticsfile.46 for example.
+      files_to_return:
+        - collider.json.zip
+        - output_python.txt
+        - error_python.txt
+        - tree_maker.json
+        - tree_maker.log
+        - particles
+        - config_gen1.yaml
+      run_on: "htc" # "local_pc" 'htc_docker' #'htc' #'slurm' #'slurm_docker'
+      context: "cpu" # 'cupy' # opencl # how to run the simulation
+      # Following parameter is ignored when run_on is not htc or htc_docker
+      htc_job_flavor: "microcentury" # optional parameter to define job flavor, default is espresso
+    2: # Launch the pymask and prepare the colliders
+      job_folder: "../../template_jobs/2_configure_and_track"
+      job_executable: 2_configure_and_track.py # has to be a python file
+      files_to_clone:
+        - misc.py
+      files_to_copy_node:
+        - 2_configure_and_track.py
+        - config.yaml
+        - misc.py
+        - "/afs/cern.ch/work/a/aradosla/private/runIII_2025/studies/filling_scheme" # change with  ../../../../filling_scheme
+        - "../config_gen1.yaml"
+        - "../collider.json.zip"
+        - "../particles"
+      files_to_return:
+        - output_particles.parquet
+        - output_python.txt
+        - error_python.txt
+        - tree_maker.json
+        - tree_maker.log
+        - config_final.yaml
+      context: "cpu" # 'cupy' # opencl # how to run the simulation
+      run_on: "htc" # 'local_pc' # 'htc_docker' #'htc' #'slurm' #'slurm_docker'
+      # Following parameter is ignored when run_on is not htc or htc_docker
+      htc_job_flavor: "tomorrow" # optional parameter to define job flavor, default is espresso
+
+```
+
+## Running the study
+
+### Change the parameters in studies/scripts/1_create_study.py
+
+1) Inside you have the optics, octupoles, tunes etc. You can run tune scans for example by changing
+```
+array_qx = np.round(np.arange(62.305, 62.330, 0.001), decimals=4)
+array_qy = np.round(np.arange(60.305, 60.330, 0.001), decimals=4)
+```
+2) Then you run this script and it will create folders in studies/scan/example_tunescan/base_collider/
+There are multiple jobs with mutated configs with some of the tunes you want to scan.
+
+3) Now we can launch the study. Run in studies/scripts 2_run_jobs.py.
+   It constists of 2 generations: The first launch is going to build the basic collider that will be stored in the folder studies/scan/example_tunescan/base_collider/. After it is completed, run studies/scripts 2_run_jobs.py again! This launches the second generation and the real study.
+
+4) The output_particles.parquet file is the result of studies/scripts 2_run_jobs.py running properly stored in studies/scan/example_tunescan/base_collider/xtrack_0000 - xtrack_9999.
+Some jobs are not going to run and it is normal! The tunes or in general parameters in that region are not stable and no result is produced. Simply ignore.
+
+5) In order to get the DA result we need to process the results: run studies/scripts 3_postprocessing.py.
+   It creates a da.parquet in the studies/scan/example_tunescan/
+
+6) Plot the results example DA vs tune: folder my_scripts contains a DA_plot.py.
+
+### Installing with Poetry SKIP THIS IF YOU INSTALL WITHOUT POETRY!
 
 If not already done, install Poetry following the tutorial [here](https://python-poetry.org/docs/). Note that Poetry must have access to Python 3.9 or above for the rest of the tutorial to work. More importantly, the executable of Python must be accessible from a cluster node (e.g. located on AFS when submitting jobs to HTCondor) for a submission to work. Ideally, Poetry should use a Python distribution located on your local machine (shared acress all of your projects), and then use another Python distribution (e.g. miniforge or miniconda) on AFS for the simulations (which can be shared across projects or not, depending on the needs).
 
@@ -121,13 +224,7 @@ poetry env list --full-path
 
 Identify the virtual environment that is being used and copy the corresponding path. Now, open the file `source_python.sh` and replace the line `source $SCRIPT_DIR/.venv/bin/activate`with the path to the virtual environment you just found (e.g. `source /path/to/your/virtual/environment/bin/activate`).
 
-### Installing without Poetry
 
-It is strongly recommended to use Poetry as it will handle all the packages dependencies and the virtual environment for you. However, if you prefer to install the packages manually, you can do so by running the following commands (granted that you have Python installed along with pip):
-
-```bash
-pip install -r requirements.txt
-```
 
 ## Running a simple parameter scan simulation
 
