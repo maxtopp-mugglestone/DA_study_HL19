@@ -15,7 +15,7 @@ Jobs can be efficiently stored and parallelized using the
 Run the following command to clone the repository and all the relevant submodules:
 
 ```bash
-git clone --recurse-submodules https://github.com/xsuite/example_DA_study.git
+git clone --recurse-submodules git@github.com:aradosla/example_DA_study.git
 ```
 
 If you missed this step and clone the repository without the submodules, you can do _a posteriori_:
