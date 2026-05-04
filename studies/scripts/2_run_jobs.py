@@ -1,12 +1,14 @@
 # ==================================================================================================
 # --- Imports
 # ==================================================================================================
+# Standard library imports
 import copy
 import os
 import subprocess
 import time
 from pathlib import Path
 
+# Third party imports
 import psutil
 import tree_maker
 import yaml
@@ -16,7 +18,7 @@ import yaml
 # --- Class for job submission
 # ==================================================================================================
 class ClusterSubmission:
-    def __init__(self, config, path_root):
+    def __init__(self, config, path_root, root, singularity_image=None):
         # Configuration of the current generation
         self.config = config
         if config["run_on"] in ["local_pc", "htc", "slurm", "htc_docker", "slurm_docker"]:
@@ -35,15 +37,24 @@ class ClusterSubmission:
             self.slurm_queue_statement = ""
         else:
             self.request_GPUs = 0
+            self.request_CPUs = 4
             self.slurm_queue_statement = "#SBATCH --partition=slurm_hpc_acc"
+        print(root.parameters)
+        self.eos_python = root.parameters["eos_python"]
 
         # Path to store the association between job path and job id after submission
         self.path_root = path_root
         self.path_dic_id_to_job = f"{self.path_root}/id_job.yaml"
+        
+        files_input = config["files_to_copy_node"] #list(config["files_to_clone"]) + [config["optics_path"]]
+        files_input = ", ".join(files_input)
+        files_output = config["files_to_return"]
+        files_output = ", ".join(files_output)
+
 
         # Path to singularity image
-        if "singularity_image" in self.config:
-            self.path_image = self.config["singularity_image"]
+        if singularity_image is not None:
+            self.path_image = singularity_image
         elif self.run_on in ["slurm_docker", "htc_docker"]:
             raise ValueError("Error: Singularity image must be specified for docker submission")
         else:
@@ -93,11 +104,18 @@ class ClusterSubmission:
                     + "error  = error.txt\n"
                     + "output = output.txt\n"
                     + "log  = log.txt\n"
+                    #+ "transfer_input_files = root://eosuser.cern.ch//eos/user/s/skostogl/python_for_afs/xsuite_env.tar.gz\n"
+                    + f"transfer_input_files = {self.eos_python}, {files_input}, tree_maker.json, tree_maker.log\n"
+                    + f"transfer_output_files = {files_output}\n"
+                    #+"when_to_transfer_output = ON_EXIT\n"
+                    + "+AccountingGroup = \"group_u_ATS.all\"\n"
                 ),
                 "body": (
-                    lambda path_node: f"initialdir = {path_node}\n"
+                    lambda path_node, job_flavour: f"initialdir = {path_node}\n"
                     + f"executable = {path_node}/run.sh\n"
                     + f"request_GPUs = {self.request_GPUs}\n"
+                    + f"request_CPUs = {self.request_CPUs}\n"
+                    + f'+JobFlavour  = "{job_flavour}"\n'
                     + "queue\n"
                 ),
                 "tail": f"#{self.run_on}\n",
@@ -114,9 +132,11 @@ class ClusterSubmission:
                     + f' "{self.path_image}"\n'
                 ),
                 "body": (
-                    lambda path_node: f"initialdir = {path_node}\n"
+                    lambda path_node, job_flavour: f"initialdir = {path_node}\n"
                     + f"executable = {path_node}/run.sh\n"
                     + f"request_GPUs = {self.request_GPUs}\n"
+                    + f"request_CPUs = {self.request_CPUs}\n"
+                    + f'+JobFlavour  = "{job_flavour}"\n'
                     + "queue\n"
                 ),
                 "tail": f"#{self.run_on}\n",
@@ -266,19 +286,16 @@ class ClusterSubmission:
                 if self._test_node(node, path_job, running_jobs, queuing_jobs):
                     print(f'Writing submission command for node "{path_node}"')
                     # Write instruction for submission
-                    fid.write(str_body(path_node))
-
-                    # if user has defined a htc_job_flavor in config.yaml otherwise default is "espresso"
-                    if write_htc_job_flavour:
-                        if "htc_job_flavor" in self.config:
-                            htc_job_flavor = self.config["htc_job_flavor"]
-                        else:
-                            print(
-                                "Warning: htc_job_flavor not defined in config.yaml. Using espresso"
-                                " as default"
-                            )
-                            htc_job_flavor = "espresso"
-                        fid.write(f'+JobFlavour  = "{htc_job_flavor}"\n')
+                    if self.run_on in ["htc", "htc_docker"] and "htc_job_flavor" in self.config:
+                        fid.write(str_body(path_node, self.config["htc_job_flavor"]))
+                    elif self.run_on in ["htc", "htc_docker"]:
+                        print(
+                            "Warning: htc_job_flavor not defined in config.yaml. Using espresso as"
+                            " default"
+                        )
+                        fid.write(str_body(path_node, "espresso"))
+                    else:
+                        fid.write(str_body(path_node))
 
                     # Add job to list
                     l_path_jobs.append(path_job)
@@ -532,7 +549,9 @@ def submit_jobs_generation(root, generation=1):
 
     # Submit all the pending jobs of a given generation
     config_generation = root.parameters["generations"][f"{generation}"]
-    cluster_submission = ClusterSubmission(config_generation, root.get_abs_path())
+    singularity_image = root.parameters["generations"][str(generation)]["singularity_image"]
+    cluster_submission = ClusterSubmission(
+        config_generation, root.get_abs_path(), root, singularity_image)
     path_file = f"../submission_files/{dic_int_to_str[generation]}_generation.sub"
     l_filenames, l_path_jobs = cluster_submission.write_sub_files(
         root.generation(generation), path_file

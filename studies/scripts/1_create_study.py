@@ -37,152 +37,8 @@ d_config_particles["n_angles"] = 5
 d_config_particles["n_split"] = 5
 
 # ==================================================================================================
-# --- Optics collider parameters (generation 1)
-#
-# Below, the user defines the optics collider parameters. These parameters cannot be scanned.
-# Path for the collider configuration:
-# master_study/master_jobs/1_build_distr_and_collider/config.yaml [field config_mad]
+d_config_collider = yaml.safe_load(open("config_collider.yaml"))
 # ==================================================================================================
-
-### Mad configuration
-
-# Define dictionary for the Mad configuration
-d_config_mad = {"beam_config": {"lhcb1": {}, "lhcb2": {}}, "links": {}}
-
-# Optic file path (version, and round or flat)
-
-### For v1.6 optics
-d_config_mad["links"]["acc-models-lhc"] = "../../../../external_dependencies/acc-models-lhc"
-d_config_mad["optics_file"] = "acc-models-lhc/strengths/ramp/opt_ramp_500_1500_thin.madx"
-d_config_mad["ver_hllhc_optics"] = 1.6
-
-
-# Beam energy (for both beams)
-beam_energy_tot = 7000
-d_config_mad["beam_config"]["lhcb1"]["beam_energy_tot"] = beam_energy_tot
-d_config_mad["beam_config"]["lhcb2"]["beam_energy_tot"] = beam_energy_tot
-
-
-# ==================================================================================================
-# --- Base collider parameters (generation 2)
-#
-# Below, the user defines the standard collider parameters. Some of the values defined here are
-# later updated according to the grid-search being done.
-# Path for the collider config:
-# master_study/master_jobs/2_configure_and_track/config.yaml [field config_collider]
-# ==================================================================================================
-
-### Tune and chroma configuration
-
-# Define dictionnary for tune and chroma
-d_config_tune_and_chroma = {
-    "qx": {},
-    "qy": {},
-    "dqx": {},
-    "dqy": {},
-}
-for beam in ["lhcb1", "lhcb2"]:
-    d_config_tune_and_chroma["qx"][beam] = 62.31
-    d_config_tune_and_chroma["qy"][beam] = 60.32
-    d_config_tune_and_chroma["dqx"][beam] = 15.0
-    d_config_tune_and_chroma["dqy"][beam] = 15.0
-
-# Value to be added to linear coupling knobs
-d_config_tune_and_chroma["delta_cmr"] = 0.001  # type: ignore
-d_config_tune_and_chroma["delta_cmi"] = 0.0  # type: ignore
-
-### Knobs configuration
-
-# Define dictionary for the knobs settings
-d_config_knobs = {}
-
-# Knobs at IPs
-d_config_knobs["on_x1"] = 250
-d_config_knobs["on_sep1"] = 0
-d_config_knobs["on_x2"] = -170
-d_config_knobs["on_sep2"] = 0.138
-d_config_knobs["on_x5"] = 250
-d_config_knobs["on_sep5"] = 0
-d_config_knobs["on_x8h"] = 0.0
-d_config_knobs["on_x8v"] = 170
-
-# Crab cavities
-d_config_knobs["on_crab1"] = 0
-d_config_knobs["on_crab5"] = 0
-
-# Octupoles
-d_config_knobs["i_oct_b1"] = 60.0
-d_config_knobs["i_oct_b2"] = 60.0
-
-### leveling configuration
-
-# Leveling in IP 1/5
-d_config_leveling_ip1_5 = {"constraints": {}}
-d_config_leveling_ip1_5["luminosity"] = 2.0e34  # type: ignore
-d_config_leveling_ip1_5["constraints"]["max_intensity"] = 2.3e11
-d_config_leveling_ip1_5["constraints"]["max_PU"] = 160
-
-
-# Define dictionary for the leveling settings
-d_config_leveling = {
-    "ip2": {},
-    "ip8": {},
-}
-
-# Luminosity and particles
-
-
-# Leveling parameters (ignored if skip_leveling is True)
-d_config_leveling["ip2"]["separation_in_sigmas"] = 5
-d_config_leveling["ip8"]["luminosity"] = 2.0e33
-
-### Beam beam configuration
-
-# Define dictionary for the beam beam settings
-d_config_beambeam = {"mask_with_filling_pattern": {}}
-
-# Beam settings
-d_config_beambeam["num_particles_per_bunch"] = 1.4e11  # type: ignore
-d_config_beambeam["nemitt_x"] = 2.5e-6  # type: ignore
-d_config_beambeam["nemitt_y"] = 2.5e-6  # type: ignore
-
-# Filling scheme (in json format)
-# The scheme should consist of a json file containing two lists of booleans (one for each beam),
-# representing each bucket of the LHC.
-# Alternatively, one can get a fill directly from LPC from, e.g.:
-# https://lpc.web.cern.ch/cgi-bin/fillTable.py?year=2023
-# In this page, get the fill number of your fill of interest, and use it to replace the XXXX in the
-# URL below before downloading:
-# https://lpc.web.cern.ch/cgi-bin/schemeInfo.py?fill=XXXX&fmt=json
-filling_scheme_path = os.path.abspath(
-    "../filling_scheme/8b4e_1972b_1960_1178_1886_224bpi_12inj_800ns_bs200ns.json"
-)
-# Add to config file
-d_config_beambeam["mask_with_filling_pattern"]["pattern_fname"] = filling_scheme_path
-
-# Initialize bunch number
-# If set to None, it will be set automatically to the worst bunch when running 2nd generation
-d_config_beambeam["mask_with_filling_pattern"]["i_bunch_b1"] = None
-d_config_beambeam["mask_with_filling_pattern"]["i_bunch_b2"] = None
-
-# ==================================================================================================
-# --- Generate dictionnary to encapsulate all base collider parameters (generation 2)
-# ==================================================================================================
-d_config_collider = {}
-
-# Add tunes and chromas
-d_config_collider["config_knobs_and_tuning"] = d_config_tune_and_chroma
-
-# Add knobs
-d_config_collider["config_knobs_and_tuning"]["knob_settings"] = d_config_knobs
-
-# Add luminosity configuration
-d_config_collider["config_lumi_leveling_ip1_5"] = d_config_leveling_ip1_5
-d_config_collider["config_lumi_leveling"] = d_config_leveling
-
-# Add beam beam configuration
-d_config_collider["config_beambeam"] = d_config_beambeam
-
 # ==================================================================================================
 # --- Tracking parameters (generation 2)
 #
@@ -191,14 +47,21 @@ d_config_collider["config_beambeam"] = d_config_beambeam
 d_config_simulation = {}
 
 # Number of turns to track
-d_config_simulation["n_turns"] = 200
+d_config_simulation["n_turns"] = 1000000
 
 # Initial off-momentum
 d_config_simulation["delta_max"] = 27.0e-5
 
-# Beam to track (lhcb1 or lhcb2)
-d_config_simulation["beam"] = "lhcb1"
+# Beam to track (b1 or b2)
+d_config_simulation["beam"] = "b1"
 
+# Tolerances tune and coupling
+d_config_simulation["tol_qx"] = 1e-4 # 1e-4
+d_config_simulation["tol_qy"] = 1e-4 # 1e-4
+d_config_simulation["tol_dqx"] = 0.05
+d_config_simulation["tol_dqy"] = 0.05
+d_config_simulation["tol_cminus"] = 1e-3 #1e-4
+d_config_simulation["tol_qknobs_step"] = 1e-6 # 1e-4
 # ==================================================================================================
 # --- Dump collider and collider configuration
 #
@@ -207,7 +70,6 @@ d_config_simulation["beam"] = "lhcb1"
 # ==================================================================================================
 dump_collider = False
 dump_config_in_collider = False
-
 # ==================================================================================================
 # --- Machine parameters being scanned (generation 2)
 #
@@ -231,13 +93,13 @@ keep = "upper_triangle"  # 'lower_triangle', 'all'
 # ==================================================================================================
 
 # Build empty tree: first generation (later added to the root), and second generation
-children = {"base_collider": {"config_particles": {}, "config_mad": {}, "children": {}}}
+children = {"base_collider": {"config_particles": {}, "config_collider": {}, "children": {}}}
 
 # Add particles distribution parameters to the first generation
 children["base_collider"]["config_particles"] = d_config_particles
 
 # Add base machine parameters to the first generation
-children["base_collider"]["config_mad"] = d_config_mad
+children["base_collider"]["config_collider"] = d_config_collider
 
 
 # ==================================================================================================
@@ -246,8 +108,8 @@ children["base_collider"]["config_mad"] = d_config_mad
 # We now set a second generation for the tree. This second generation contains the tracking
 # parameters, as well as a default set of parameters for the colliders (defined above), that we
 # mutate according to the parameters we want to scan.
-# ! Caution when mutating the dictionnary in this function, you have to pass a deepcopy to children,
-# ! otherwise the dictionnary will be mutated for all the children.
+# ! Caution when mutating the dictionary in this function, you have to pass a deepcopy to children,
+# ! otherwise the dictionary will be mutated for all the children.
 # ==================================================================================================
 track_array = np.arange(d_config_particles["n_split"])
 for idx_job, (track, qx, qy) in enumerate(itertools.product(track_array, array_qx, array_qy)):
@@ -262,9 +124,9 @@ for idx_job, (track, qx, qy) in enumerate(itertools.product(track_array, array_q
         pass
 
     # Mutate the appropriate collider parameters
-    for beam in ["lhcb1", "lhcb2"]:
-        d_config_collider["config_knobs_and_tuning"]["qx"][beam] = float(qx)
-        d_config_collider["config_knobs_and_tuning"]["qy"][beam] = float(qy)
+    for beam in ["b1", "b2"]:
+        d_config_collider["tuning"]["qx"][beam] = float(qx)
+        d_config_collider["tuning"]["qy"][beam] = float(qy)
 
     # Complete the dictionnary for the tracking
     d_config_simulation["particle_file"] = f"../particles/{track:02}.parquet"
@@ -283,7 +145,7 @@ for idx_job, (track, qx, qy) in enumerate(itertools.product(track_array, array_q
 # --- Simulation configuration
 # ==================================================================================================
 # Load the tree_maker simulation configuration
-config = yaml.safe_load(open("config.yaml"))
+config = yaml.safe_load(open("config_sim.yaml"))
 
 # # Set the root children to the ones defined above
 config["root"]["children"] = children

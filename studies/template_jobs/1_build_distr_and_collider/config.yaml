@@ -5,53 +5,350 @@ config_particles:
   n_angles: 5
   n_split: 15
 
-config_mad:
-  # Links to be made for tools and scripts
-  links:
-    acc-models-lhc: ../../../../../external_dependencies/acc-models-lhc
+config_collider: 
+  label: thick
+  lattice_file: lhc.json
+  optics_file: opt_150.madx
 
-  # Optics file
-  optics_file: acc-models-lhc/strengths/flat/opt_flathv_500_2000_thin.madx
+  # label: thin_test
+  # lattice_file: lhc_thin.json
+  # optics_file: opt_150_thin.madx
 
-  # Beam parameters
-  beam_config:
-    lhcb1:
-      beam_energy_tot: 7000 # [GeV]
-    lhcb2:
-      beam_energy_tot: 7000 # [GeV]
+  # label: legacy_thick_test
+  # lattice_file: lhc.legacy.json
+  # optics_file: opt_150.legacy.madx
 
-  # Enable machine imperfections
-  enable_imperfections: false
+  new_knobs: {
 
-  # Enable knob synthesis (for coupling correction, if no imperfections)
-  enable_knob_synthesis: true
+    p0c: 7e12, # Need to change the energy here to have it in the closed-orbit
+              # correction references
 
-  # Rename the coupling knobs to avoid conflict between b1 and b2
-  # (for hllhc using old fortran code to generate the knobs)
-  rename_coupling_knobs: true
+    on_alice: on_alice_normalized * 7000e9 / energy0_b1,
+    on_lhcb: on_lhcb_normalized * 7000e9 / energy0_b1,
 
-  # Optics version, for choice of correction algorithms
-  # (ver_lhc_run or ver_hllhc_optics)
-  ver_hllhc_optics: 1.6
-  ver_lhc_run: null
+    # Octupole knobs
+    kof.b1: kmax_mo / imax_mo * i_oct_b1 / brho0_b1,
+    kof.b2: kmax_mo / imax_mo * i_oct_b2 / brho0_b2,
+    kod.b1: kmax_mo / imax_mo * i_oct_b1 / brho0_b1,
+    kod.b2: kmax_mo / imax_mo * i_oct_b2 / brho0_b2,
+    kof.a12b1: kof.b1,  kof.a23b1: kof.b1,  kof.a34b1: kof.b1,  kof.a45b1: kof.b1,
+    kof.a56b1: kof.b1,  kof.a67b1: kof.b1,  kof.a78b1: kof.b1,  kof.a81b1: kof.b1,
+    kof.a12b2: kof.b2,  kof.a23b2: kof.b2,  kof.a34b2: kof.b2,  kof.a45b2: kof.b2,
+    kof.a56b2: kof.b2,  kof.a67b2: kof.b2,  kof.a78b2: kof.b2,  kof.a81b2: kof.b2,
+    kod.a12b1: kod.b1,  kod.a23b1: kod.b1,  kod.a34b1: kod.b1,  kod.a45b1: kod.b1,
+    kod.a56b1: kod.b1,  kod.a67b1: kod.b1,  kod.a78b1: kod.b1,  kod.a81b1: kod.b1,
+    kod.a12b2: kod.b2,  kod.a23b2: kod.b2,  kod.a34b2: kod.b2,  kod.a45b2: kod.b2,
+    kod.a56b2: kod.b2,  kod.a67b2: kod.b2,  kod.a78b2: kod.b2,  kod.a81b2: kod.b2
 
-  # Parameters for machine imperfections
-  pars_for_imperfections:
-    par_myseed: 1
-    par_correct_for_D2: 0
-    par_correct_for_MCBX: 0
-    par_on_errors_LHC: 1
-    par_off_errors_Q4_inIP15: 0
-    par_off_errors_Q5_inIP15: 0
-    par_on_errors_MBH: 1
-    par_on_errors_Q4: 1
-    par_on_errors_D2: 1
-    par_on_errors_D1: 1
-    par_on_errors_IT: 1
-    par_on_errors_MCBRD: 0
-    par_on_errors_MCBXF: 0
-    par_on_errors_NLC: 0
-    par_write_errortable: 1
+  }
+
+  apply_multipolar_errors:
+    on_error_arc: '../hllhc_prepare_multipolar_errors/multipole_errors_pre_hllhc/multipole_errors_arc.json'
+    on_error_triplets_ir15: '../hllhc_prepare_multipolar_errors/multipole_errors_hllhc_ir15/multipole_errors_inner_triplet_d1_ir15.json'
+    on_error_d2_ir15: '../hllhc_prepare_multipolar_errors/multipole_errors_hllhc_ir15/multipole_errors_d2_ir15.json'
+    _config_:
+      min_order: 0
+      max_order: 15
+
+  knob_settings:
+    p0c: 7e12              # beam energy
+    # Orbit knobs
+    on_x1hs: 250           # [urad]
+    on_sep1v: 0            # [mm]
+    on_x2v: -170           # [urad]
+    on_sep2h: 0.138        # [mm]
+    on_x5vs: 250           # [urad]
+    on_sep5h: 0            # [mm]
+    on_x8v: -200           # [urad]
+    on_sep8h: -0.043       # [mm]
+    on_sep8v: -0.01        # [mm]
+
+    on_disp: 1.
+    on_dx1hs: on_x1hs*on_disp
+    on_dsep1v: on_sep1v*on_disp
+    on_dx5vs: on_x5vs*on_disp
+    on_dsep5h: on_sep5h*on_disp
+
+    # Crab cavities
+    on_crab1: -190        # [urad]
+    on_crab5: -190        # [urad]
+
+    # Magnets of the experiments
+    on_alice_normalized: 1
+    on_lhcb_normalized: 1
+    on_sol_atlas: 0
+    on_sol_cms: 0
+    on_sol_alice: 0
+
+    # RF voltage and phases
+    vrf400: 16.0            # [MV]
+    lagrf400.b1: 0.5        # [rad]
+    lagrf400.b2: 0.         # [rad]
+
+    # Octupoles
+    i_oct_b1: -235          # [A]
+    i_oct_b2: -235          # [A]
+
+    # No linear errors
+    on_error_arc_k0: 0
+    on_error_arc_k0s: 0
+    on_error_arc_k1: 0
+    on_error_arc_k1s: 0
+    on_error_triplets_ir15_k0: 0
+    on_error_triplets_ir15_k0s: 0
+    on_error_triplets_ir15_k1: 0
+    on_error_triplets_ir15_k1s: 0
+    on_error_d2_ir15_k0: 0
+    on_error_d2_ir15_k0s: 0
+    on_error_d2_ir15_k1: 0
+    on_error_d2_ir15_k1s: 0
+
+
+  lumi_leveling:
+    ip2:
+      separation_in_sigmas: 5
+      plane: 'x'
+      impose_separation_orthogonal_to_crossing: false
+      knobs:
+        - on_sep2h
+      bump_range:
+        b1:
+          - e.ds.l2.b1
+          - s.ds.r2.b1
+        b2:
+          - s.ds.r2.b2
+          - e.ds.l2.b2
+      preserve_angles_at_ip: true
+      preserve_bump_closure: true
+      corrector_knob_names:
+        # to preserve angles at ip
+        - corr_co_acbyvs4.l2b1
+        - corr_co_acbyhs4.l2b1
+        - corr_co_acbyvs4.r2b2
+        - corr_co_acbyhs4.r2b2
+        # to close the bumps
+        - corr_co_acbyvs4.l2b2
+        - corr_co_acbyhs4.l2b2
+        - corr_co_acbyvs4.r2b1
+        - corr_co_acbyhs4.r2b1
+        - corr_co_acbyhs5.l2b2
+        - corr_co_acbyvs5.l2b2
+        - corr_co_acbchs5.r2b1
+        - corr_co_acbcvs5.r2b1
+
+    ip8:
+      luminosity: 2.0e+33
+      num_colliding_bunches: 2572
+      impose_separation_orthogonal_to_crossing: true
+      knobs:
+        - on_sep8h
+        - on_sep8v
+      bump_range:
+        b1:
+          - e.ds.l8.b1
+          - s.ds.r8.b1
+        b2:
+          - s.ds.r8.b2
+          - e.ds.l8.b2
+      preserve_angles_at_ip: true
+      preserve_bump_closure: true
+      corrector_knob_names:
+        # to preserve angles at ip
+        - corr_co_acbyvs4.l8b1
+        - corr_co_acbyhs4.l8b1
+        - corr_co_acbyvs4.r8b2
+        - corr_co_acbyhs4.r8b2
+        # to close the bumps
+        - corr_co_acbyvs4.l8b2
+        - corr_co_acbyhs4.l8b2
+        - corr_co_acbyvs4.r8b1
+        - corr_co_acbyhs4.r8b1
+        - corr_co_acbcvs5.l8b2
+        - corr_co_acbchs5.l8b2
+        - corr_co_acbyvs5.r8b1
+        - corr_co_acbyhs5.r8b1
+
+
+  knobs_to_zero_for_flat_orbit:
+    - on_x1hs
+    - on_sep1v
+    - on_x2v
+    - on_sep2h
+    - on_x5vs
+    - on_sep5h
+    - on_x8v
+    - on_sep8h
+    - on_sep8v
+    - on_disp
+    - on_dx1hs
+    - on_dsep1v
+    - on_dx5vs
+    - on_dsep5h
+    - on_crab1
+    - on_crab5
+
+  beam_beam:
+    install_beam_beam: true
+    bunch_spacing_buckets: 10
+    num_slices_head_on: 11
+    num_long_range_encounters_per_side:
+      ip1: 25
+      ip2: 20
+      ip5: 25
+      ip8: 20
+    sigma_z: 0.076
+    num_particles_per_bunch: 2.2e11
+    nemitt_x: 2.5e-6
+    nemitt_y: 2.5e-6
+    mask_with_filling_pattern:
+      pattern_fname: 
+        /afs/cern.ch/work/t/toppmugg/private/DA_HL19/studies/filling_scheme/8b4e_1972b_1960_1178_1886_224bpi_12inj_800ns_bs200ns.json
+      i_bunch_b1: 1963 # If not specified, the bunch with the worst schedule is chosen
+      i_bunch_b2: 1963 # Same. A value for i_bunch_b1 and i_bunch_b2 must be specified if pattern_fname is specified
+
+  tuning:
+    qx:
+      b1: 62.31
+      b2: 62.31
+    qy:
+      b1: 60.32
+      b2: 60.32
+    dqx:
+      b1: 5
+      b2: 5
+    dqy:
+      b1: 6
+      b2: 6
+
+    knob_names:
+      b1:
+        q_knob_1: dqx.b1_op
+        q_knob_2: dqy.b1_op
+        dq_knob_1: dqpx.b1_op
+        dq_knob_2: dqpy.b1_op
+        c_minus_knob_1: cmrs.b1_op
+        c_minus_knob_2: cmis.b1_op
+      b2:
+        q_knob_1: dqx.b2_op
+        q_knob_2: dqy.b2_op
+        dq_knob_1: dqpx.b2_op
+        dq_knob_2: dqpy.b2_op
+        c_minus_knob_1: cmrs.b2_op
+        c_minus_knob_2: cmis.b2_op
+
+    steps:
+      q_knob: 1e-4
+      dq_knob: 1e-3
+      c_minus_knob: 1e-5
+
+    tolerances:
+      tune: 1e-4
+      chromaticity: 0.05
+      c_minus: 2e-4
+
+    closed_orbit_correction:
+      b1: corr_co_b1.json
+      b2: corr_co_b2.json
+
+  ir_corrections:
+    ip1:
+      range_b1: [bptdv.a4l1.b1, bptdh.a4r1.b1]
+      range_b2: [bptdh.a4r1.b2, bptdh.a4l1.b2]
+      corrections:
+        on_corr_k2_ip1:
+          correction_knobs: [kcsx3.l1, kcsx3.r1]
+          target_quantities_b1: {f1020_b1: f1020}
+          target_quantities_b2: {f1020_b2: f1020}
+          feed_down: false
+        on_corr_k3_ip1:
+          correction_knobs: [kcox3.l1, kcox3.r1]
+          target_quantities_b1: {f4000_b1: f4000}
+          target_quantities_b2: {f4000_b2: f4000}
+          feed_down: false
+        on_corr_k4_ip1:
+          correction_knobs: [kcdx3.l1, kcdx3.r1]
+          target_quantities_b1: {f5000_b1: f5000}
+          target_quantities_b2: {f5000_b2: f5000}
+          feed_down: false
+        on_corr_k5_ip1:
+          correction_knobs: [kctx3.l1, kctx3.r1]
+          target_quantities_b1: {f6000_b1: f6000}
+          target_quantities_b2: {f6000_b2: f6000}
+          feed_down: false
+        on_corr_k1s_ip1:
+          correction_knobs: [kqsx3.l1, kqsx3.r1]
+          target_quantities_b1: {f1001_b1: f1001}
+          target_quantities_b2: {f1001_b2: f1001}
+          feed_down: false
+        on_corr_k2s_ip1:
+          correction_knobs: [kcssx3.l1, kcssx3.r1]
+          target_quantities_b1: {f0030_b1: f0030}
+          target_quantities_b2: {f0030_b2: f0030}
+          feed_down: false
+        on_corr_k3s_ip1:
+          correction_knobs: [kcosx3.l1, kcosx3.r1]
+          target_quantities_b1: {f1030_b1: f1030}
+          target_quantities_b2: {f1030_b2: f1030}
+          feed_down: false
+        on_corr_k4s_ip1:
+          correction_knobs: [kcdsx3.l1, kcdsx3.r1]
+          target_quantities_b1: {f0050_b1: f0050}
+          target_quantities_b2: {f0050_b2: f0050}
+          feed_down: false
+        on_corr_k5s_ip1:
+          correction_knobs: [kctsx3.l1, kctsx3.r1]
+          target_quantities_b1: {f1050_b1: f1050}
+          target_quantities_b2: {f1050_b2: f1050}
+          feed_down: false
+    ip5:
+      range_b1: [bptdv.a4l5.b1, bptdh.a4r5.b1]
+      range_b2: [bptdh.a4r5.b2, bptdh.a4l5.b2]
+      corrections:
+        on_corr_k2_ip5:
+          correction_knobs: [kcsx3.l5, kcsx3.r5]
+          target_quantities_b1: {f1020_b1: f1020}
+          target_quantities_b2: {f1020_b2: f1020}
+          feed_down: false
+        on_corr_k3_ip5:
+          correction_knobs: [kcox3.l5, kcox3.r5]
+          target_quantities_b1: {f4000_b1: f4000}
+          target_quantities_b2: {f4000_b2: f4000}
+          feed_down: false
+        on_corr_k4_ip5:
+          correction_knobs: [kcdx3.l5, kcdx3.r5]
+          target_quantities_b1: {f5000_b1: f5000}
+          target_quantities_b2: {f5000_b2: f5000}
+          feed_down: false
+        on_corr_k5_ip5:
+          correction_knobs: [kctx3.l5, kctx3.r5]
+          target_quantities_b1: {f6000_b1: f6000}
+          target_quantities_b2: {f6000_b2: f6000}
+          feed_down: false
+        on_corr_k1s_ip5:
+          correction_knobs: [kqsx3.l5, kqsx3.r5]
+          target_quantities_b1: {f1001_b1: f1001}
+          target_quantities_b2: {f1001_b2: f1001}
+          feed_down: false
+        on_corr_k2s_ip5:
+          correction_knobs: [kcssx3.l5, kcssx3.r5]
+          target_quantities_b1: {f0030_b1: f0030}
+          target_quantities_b2: {f0030_b2: f0030}
+          feed_down: false
+        on_corr_k3s_ip5:
+          correction_knobs: [kcosx3.l5, kcosx3.r5]
+          target_quantities_b1: {f1030_b1: f1030}
+          target_quantities_b2: {f1030_b2: f1030}
+          feed_down: false
+        on_corr_k4s_ip5:
+          correction_knobs: [kcdsx3.l5, kcdsx3.r5]
+          target_quantities_b1: {f0050_b1: f0050}
+          target_quantities_b2: {f0050_b2: f0050}
+          feed_down: false
+        on_corr_k5s_ip5:
+          correction_knobs: [kctsx3.l5, kctsx3.r5]
+          target_quantities_b1: {f1050_b1: f1050}
+          target_quantities_b2: {f1050_b2: f1050}
+          feed_down: false
 
 # Context for the simulation
 context: "cpu" # 'cupy' # opencl
