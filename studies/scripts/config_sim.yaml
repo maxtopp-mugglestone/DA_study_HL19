@@ -41,15 +41,15 @@
         - "../collider.json.zip"
         - "../particles"
       files_to_return:
-        - output_particles.parquet
         - output_python.txt
         - error_python.txt
         - tree_maker.json
         - tree_maker.log
         - config_final.yaml
+        - output_particles.parquet
       context: "cpu" # 'cupy' # opencl # how to run the simulation
       run_on: "htc" # 'local_pc' # 'htc_docker' #'htc' #'slurm' #'slurm_docker'
       # Following parameter is ignored when run_on is not htc or htc_docker
-      htc_job_flavor: "tomorrow" # optional parameter to define job flavor, default is espresso
+      htc_job_flavor: "testmatch" # optional parameter to define job flavor, default is espresso
       # Following parameter is ignored when run_on is not htc_docker or slurm_docker
       singularity_image: "/cvmfs/unpacked.cern.ch/gitlab-registry.cern.ch/cdroin/da-study-docker:df9f2e53"

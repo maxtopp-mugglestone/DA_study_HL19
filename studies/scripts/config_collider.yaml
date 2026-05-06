@@ -95,7 +95,7 @@ knob_settings:
   on_error_d2_ir15_k1: 0
   on_error_d2_ir15_k1s: 0
 
-
+skip_leveling: false
 lumi_leveling:
   ip2:
     separation_in_sigmas: 5
@@ -192,6 +192,11 @@ beam_beam:
   num_particles_per_bunch: 2.2E+11
   nemitt_x: 2.5e-6
   nemitt_y: 2.5e-6
+  mask_with_filling_pattern:
+  pattern_fname: 
+    /afs/cern.ch/work/t/toppmugg/private/DA_HL19/studies/filling_scheme/8b4e_1972b_1960_1178_1886_224bpi_12inj_800ns_bs200ns.json
+  i_bunch_b1: 1963 # If not specified, the bunch with the worst schedule is chosen
+  i_bunch_b2: 1963 # Same. A value for i_bunch_b1 and i_bunch_b2 must be specified if pattern_fname is specified
 
 tuning:
   qx:

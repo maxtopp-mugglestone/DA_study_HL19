@@ -17,6 +17,7 @@ studies/submission_files/*
 
 # Python virtual environment
 .venv/
+*.tar.gz
 
 #vscode config
 .vscode/

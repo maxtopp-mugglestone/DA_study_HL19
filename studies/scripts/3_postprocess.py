@@ -16,7 +16,7 @@ print("Analysis of output simulation files started")
 start = time.time()
 
 # Load Data
-study_name = "example_tunescan"
+study_name = "HL19_tunescan"
 fix = f"/../scans/{study_name}"
 root = tree_maker.tree_from_json(fix[1:] + "/tree_maker.json")
 # Add suffix to the root node path to handle scans that are not in the root directory
@@ -34,7 +34,6 @@ for node in root.generation(1):
     for node_child in node.children:
         with open(f"{node_child.get_abs_path()}/config.yaml", "r") as fid:
             config_child = yaml.safe_load(fid)
-
         try:
             # Read the particle path as relative
             try:
@@ -57,12 +56,12 @@ for node in root.generation(1):
         df_sim["name base collider"] = f"{node.name}"
         df_sim["path simulation"] = f"{node_child.get_abs_path()}"
         df_sim["name simulation"] = f"{node_child.name}"
-
-        # Get node parameters as dictionnaries for parameter assignation
-        dic_child_collider = node_child.parameters["config_collider"]
+        # Get node parameters as dictionaries for parameter assignation
+        # dic_child_collider = node_child.parameters["config_collider"] unsure why this provides different results to the below
+        dic_child_collider = config_child["config_collider"] 
         dic_child_simulation = node_child.parameters["config_simulation"]
         try:
-            dic_parent_collider = node.parameters["config_mad"]
+            dic_parent_collider = node.parameters["config_collider"]
         except Exception:
             print("No parent collider could be loaded")
         dic_parent_particles = node.parameters["config_particles"]
@@ -71,27 +70,27 @@ for node in root.generation(1):
         df_sim["beam"] = dic_child_simulation["beam"]
 
         # Get scanned parameters (complete with the requested scanned parameters)
-        df_sim["qx"] = dic_child_collider["config_knobs_and_tuning"]["qx"]["lhcb1"]
-        df_sim["qy"] = dic_child_collider["config_knobs_and_tuning"]["qy"]["lhcb1"]
-        df_sim["dqx"] = dic_child_collider["config_knobs_and_tuning"]["dqx"]["lhcb1"]
-        df_sim["dqy"] = dic_child_collider["config_knobs_and_tuning"]["dqy"]["lhcb1"]
-        df_sim["i_bunch_b1"] = dic_child_collider["config_beambeam"]["mask_with_filling_pattern"][
+        df_sim["qx"] = dic_child_collider["tuning"]["qx"]["b1"]
+        df_sim["qy"] = dic_child_collider["tuning"]["qy"]["b1"]
+        df_sim["dqx"] = dic_child_collider["tuning"]["dqx"]["b1"]
+        df_sim["dqy"] = dic_child_collider["tuning"]["dqy"]["b1"]
+        df_sim["i_bunch_b1"] = dic_child_collider["beam_beam"]["mask_with_filling_pattern"][
             "i_bunch_b1"
         ]
-        df_sim["i_bunch_b2"] = dic_child_collider["config_beambeam"]["mask_with_filling_pattern"][
+        df_sim["i_bunch_b2"] = dic_child_collider["beam_beam"]["mask_with_filling_pattern"][
             "i_bunch_b2"
         ]
-        df_sim["num_particles_per_bunch"] = dic_child_collider["config_beambeam"][
+        df_sim["num_particles_per_bunch"] = dic_child_collider["beam_beam"][
             "num_particles_per_bunch"
         ]
-        df_sim["i_oct_b1"] = dic_child_collider["config_knobs_and_tuning"]["knob_settings"][
+        df_sim["i_oct_b1"] = dic_child_collider["knob_settings"][
             "i_oct_b1"
         ]
-        df_sim["i_oct_b2"] = dic_child_collider["config_knobs_and_tuning"]["knob_settings"][
+        df_sim["i_oct_b2"] = dic_child_collider["knob_settings"][
             "i_oct_b2"
         ]
         df_sim["crossing_angle"] = abs(
-            float(dic_child_collider["config_knobs_and_tuning"]["knob_settings"]["on_x1"])
+            float(dic_child_collider["knob_settings"]["on_x1hs"])
         )
 
         # Merge with particle data
@@ -118,7 +117,8 @@ group_by_parameters = ["name base collider", "qx", "qy"]
 # We always want to keep beam in the final result
 group_by_parameters = ["beam"] + group_by_parameters
 l_parameters_to_keep = [
-    "normalized amplitude in xy-plane",
+    "normalized amplitude in xy-plane_x", #different from previous
+    "normalized amplitude in xy-plane_y",
     "qx",
     "qy",
     "dqx",
