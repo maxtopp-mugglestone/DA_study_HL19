@@ -45,7 +45,7 @@ def get_title_from_conf(
     PU=True,
 ):
     # LHC version
-    LHC_version = "HL-LHC v1.9"
+    LHC_version = "HL-LHC v1.9 TEST CONFIGURATION"
 
     # Energy
     energy_value = float(conf_mad["config_collider"]["knob_settings"]["p0c"]) / 1e12 #originally from config_beam -- change later
