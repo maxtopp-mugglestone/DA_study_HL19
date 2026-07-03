@@ -2,7 +2,6 @@
 are called sequentially, in the order in which they are defined. Modularity has been favored over
 simple scripting for reproducibility, to allow rebuilding the collider from a different program
 (e.g. dahsboard)."""
-
 import contextlib
 
 # ==================================================================================================
@@ -28,6 +27,18 @@ import xobjects as xo
 import xtrack as xt
 import lumilocal
 from gen_config_orbit_correction import *
+'''
+
+# hack to use 4d twiss for bb
+import xfields as xf
+
+import xfields.config_tools.beambeam_config_tools.config_tools as ct
+from configure_beam_beam_patch import configure_beam_beam_elements_4dpatch
+
+xt.multiline_legacy.multiline_legacy.MultilineLegacy.configure_beam_beam_elements = (
+    configure_beam_beam_elements_4dpatch
+)'''
+
 
 print("CUPY_CACHE_DIR =", os.environ.get("CUPY_CACHE_DIR"))
 print("HOME =", os.environ.get("HOME"))
@@ -144,6 +155,11 @@ else:
 
 print(f"Collider loaded. Lines: {list(collider.lines.keys())}")
 
+tt = collider['b1'].get_table()
+for ele in tt.name:
+    if 'acs' in ele:
+        print(collider.b1.element_dict[ele])
+collider['b1'].twiss()
 # %%
 # ==================================================================================================
 # --- Function to install beam-beam skipped: beam-beam installed in gen1
@@ -170,10 +186,13 @@ def set_knobs(lhc, config):
     # save knobs and tuning settings from config file
     return lhc
 
+collider['b1'].twiss()
+
 collider = set_knobs(collider, config_collider)
 print("Knobs set. Current knob values:")
 for kk, vv in config_collider["knob_settings"].items():
     print(f"  {kk}: {vv}")
+collider['b1'].twiss()
 
 # %% Inspect tune and chromaticity BEFORE matching
 print("=== Tune and chromaticity BEFORE matching ===")
@@ -186,13 +205,15 @@ for line_name in ["b1", "b2"]:
             #collider[line_name][ii].lag = 180.000000001
     try: 
         tw = collider[line_name].twiss()
-    except xt.twiss.ClosedOrbitSearchError:
+    #except xt.twiss.ClosedOrbitSearchError:
+    except:
         tw = collider[line_name].twiss4d()
     print(f"\n{line_name}:")
     print(f"  Qx = {tw.qx:.6f}, Qy = {tw.qy:.6f}")
     print(f"  dQx = {tw.dqx:.2f}, dQy = {tw.dqy:.2f}")
     print(f"  c_minus = {tw.c_minus:.6f}")
 
+collider['b1'].twiss()
 # %%
 # ==================================================================================================
 # --- Output initial twiss parameters at IPs
@@ -200,7 +221,7 @@ for line_name in ["b1", "b2"]:
 try:
     twb1 = collider['b1'].twiss(method="6d", matrix_stability_tol=100)
     twb2 = collider['b2'].twiss(method="6d", matrix_stability_tol=100)
-except xt.twiss.ClosedOrbitSearchError:
+except: #xt.twiss.ClosedOrbitSearchError:
     twb1 = collider['b1'].twiss(method="4d", matrix_stability_tol=100)
     twb2 = collider['b2'].twiss(method="4d", matrix_stability_tol=100)
 print(f"--- Now displaying Twiss result at all IPS for beam 1 ---")
@@ -266,6 +287,8 @@ def match_tune_and_chroma(lhc, config, match_linear_coupling_to_zero = True):
 
     return lhc
 
+collider['b1'].twiss()
+
 collider = match_tune_and_chroma(collider, config_collider)
 print("Tune and chromaticity matched")
 
@@ -274,7 +297,7 @@ print("=== Tune and chromaticity AFTER matching ===")
 for line_name in ["b1", "b2"]:
     try: 
         tw = collider[line_name].twiss()
-    except xt.twiss.ClosedOrbitSearchError:
+    except :#xt.twiss.ClosedOrbitSearchError:
         tw = collider[line_name].twiss4d()
     target_qx = config_collider['tuning']["qx"][line_name]
     target_qy = config_collider['tuning']["qy"][line_name]
@@ -287,6 +310,7 @@ for line_name in ["b1", "b2"]:
     print(f"  dQy = {tw.dqy:.2f} (target: {target_dqy})")
     print(f"  c_minus = {tw.c_minus:.6f}")
 
+collider['b1'].twiss()
 # %%
 # ==================================================================================================
 # --- Crab cavity status
@@ -297,6 +321,8 @@ if "on_crab1" in config_collider["knob_settings"]:
     if abs(crab_val) > 0:
         crab = True
 print(f"Crab cavities active: {crab}")
+
+
 
 # %%
 # ==================================================================================================
@@ -338,7 +364,6 @@ print(f"  IP2: {n_collisions_ip2}")
 config_collider['lumi_leveling']['ip2']['num_colliding_bunches'] = n_collisions_ip2
 print(f"  IP8: {n_collisions_ip8}")
 config_collider['lumi_leveling']['ip8']['num_colliding_bunches'] = n_collisions_ip8
-
 # %%
 # ==================================================================================================
 # --- Function to do the Levelling
@@ -360,16 +385,16 @@ def level_collider(lhc, config):
         # Update the number of bunches in the configuration file
 
         # Do the levelling
-        try:
-            bunch_intensity = lumilocal.luminosity_leveling_ip1_5(
-                collider,
-                config_collider,
-                config_bb,
-                crab=crab,
-            )
-        except ValueError:
-            print("There was a problem during the luminosity leveling in IP1/5... Ignoring it.")
-            bunch_intensity = config_bb["num_particles_per_bunch"]
+        #try:
+        bunch_intensity = lumilocal.luminosity_leveling_ip1_5(
+            collider,
+            config_collider,
+            config_bb,
+            crab=crab,
+        )
+        #except ValueError:
+        #    print("There was a problem during the luminosity leveling in IP1/5... Ignoring it.")
+        #    bunch_intensity = config_bb["num_particles_per_bunch"]
 
         config_bb["num_particles_per_bunch"] = float(bunch_intensity)
     else:
@@ -377,7 +402,7 @@ def level_collider(lhc, config):
 
     xmask_leveling_ips = ['ip2', 'ip8'] #which IPs have levelling inside mask
     config_ip2_8 ={k: config_lumi_leveling[k] for k in xmask_leveling_ips}
-    opts = xlhc.luminosity_leveling( #IP2 and 8 only!
+    opts = lumilocal.luminosity_leveling( #IP2 and 8 only!
         lhc, config_lumi_leveling=config_ip2_8,
         config_beambeam=config_bb)
     
@@ -469,7 +494,7 @@ def assert_tune_chroma_coupling(collider, config_collider):
     for line_name in ["b1", "b2"]:
         try: 
             tw = collider[line_name].twiss()
-        except xt.twiss.ClosedOrbitSearchError:
+        except :#xt.twiss.ClosedOrbitSearchError:
             tw = collider[line_name].twiss4d()
         results[line_name] = {
             "qx": tw.qx,
@@ -540,7 +565,7 @@ def configure_beam_beam(lhc, config_collider):
     config_bb = config_collider['beam_beam']
     # Configure beam-beam lenses
     print('Configuring beam-beam lenses...')
-    lhc.configure_beambeam_interactions(
+    lhc.xfields.configure_beambeam_interactions(
         num_particles=config_bb['num_particles_per_bunch'],
         nemitt_x=config_bb['nemitt_x'],
         nemitt_y=config_bb['nemitt_y'])
@@ -578,7 +603,7 @@ else:
 try:
     twb1 = collider['b1'].twiss(method="6d", matrix_stability_tol=100)
     twb2 = collider['b2'].twiss(method="6d", matrix_stability_tol=100)
-except xt.twiss.ClosedOrbitSearchError:
+except: # xt.twiss.ClosedOrbitSearchError:
     twb1 = collider['b1'].twiss(method="4d", matrix_stability_tol=100)
     twb2 = collider['b2'].twiss(method="4d", matrix_stability_tol=100)
 print(f"--- Now displaying Twiss result at all IPS for beam 1 ---")
@@ -612,7 +637,7 @@ def record_final_luminosity(collider, config_bb, l_n_collisions, crab):
         try:
             twiss_b1 = collider['b1'].twiss(method="6d", matrix_stability_tol=100)
             twiss_b2 = collider['b2'].twiss(method="6d", matrix_stability_tol=100)
-        except xt.twiss.ClosedOrbitSearchError:
+        except: #xt.twiss.ClosedOrbitSearchError:
             twiss_b1 = collider['b1'].twiss(method="4d", matrix_stability_tol=100)
             twiss_b2 = collider['b2'].twiss(method="4d", matrix_stability_tol=100)
         l_lumi = []

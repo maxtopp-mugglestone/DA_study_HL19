@@ -78,12 +78,12 @@ dump_config_in_collider = False
 # ==================================================================================================
 # Scan tune with step of 0.001 (need to round to correct for numpy numerical instabilities)
 array_qx = np.round(np.arange(62.305, 62.330, 0.001), decimals=4)
-array_qy = np.round(np.arange(60.305, 60.330, 0.001), decimals=4)
+array_I = np.linspace(-600, 600, 50, endpoint=True)
 
 # In case one is doing a tune-tune scan, to decrease the size of the scan, we can ignore the
 # working points too close to resonance. Otherwise just delete this variable in the loop at the end
 # of the script
-keep = "upper_triangle"  # 'lower_triangle', 'all'
+#keep = "upper_triangle"  # 'lower_triangle', 'all'
 # ==================================================================================================
 # --- Make tree for the simulations (generation 1)
 #
@@ -112,23 +112,16 @@ children["base_collider"]["config_collider"] = d_config_collider
 # ! otherwise the dictionary will be mutated for all the children.
 # ==================================================================================================
 track_array = np.arange(d_config_particles["n_split"])
-for idx_job, (track, qx, qy) in enumerate(itertools.product(track_array, array_qx, array_qy)):
-    # If requested, ignore conditions below the upper diagonal as they can't be reached in the LHC
-    if keep == "upper_triangle":
-        if qy < (qx - 2 + 0.0039):  # 0.039 instead of 0.04 to avoid rounding errors
-            continue
-    elif keep == "lower_triangle":
-        if qy >= (qx - 2 - 0.0039):
-            continue
-    else:
-        pass
+for idx_job, (track, qx, I) in enumerate(itertools.product(track_array, array_qx, array_I)):
 
     # Mutate the appropriate collider parameters
     for beam in ["b1", "b2"]:
         d_config_collider["tuning"]["qx"][beam] = float(qx)
-        d_config_collider["tuning"]["qy"][beam] = float(qy)
+        d_config_collider["tuning"]["qy"][beam] = float(qx - 2 + 0.005)
+        d_config_collider["knob_settings"]["i_oct_b1"] = float(I)
+        d_config_collider["knob_settings"]["i_oct_b2"] = float(I)
 
-    # Complete the dictionnary for the tracking
+    # Complete the dictionary for the tracking
     d_config_simulation["particle_file"] = f"../particles/{track:02}.parquet"
     d_config_simulation["collider_file"] = "../collider.json.zip"
 
@@ -167,7 +160,7 @@ set_context(children, 1, config)
 # --- Build tree and write it to the filesystem
 # ==================================================================================================
 # Define study name
-study_name = "HL19_tunescan"
+study_name = "os_eol_hl19_flat_180_75_dQ15"
 
 # Creade folder that will contain the tree
 if not os.path.exists(f"../scans/{study_name}"):

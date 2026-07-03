@@ -1,0 +1,50 @@
+000 (11758536.000.000) 06/30 11:06:01 Job submitted from host: <188.185.70.244:9618?addrs=188.185.70.244-9618+[2001-1458-d00-7--100-2ee]-9618&alias=bigbird10.cern.ch&noUDP&sock=schedd_3169_3fb7>
+...
+040 (11758536.000.000) 06/30 11:46:38 Started transferring input files
+	Transferring to host: <188.185.193.135:9618?addrs=188.185.193.135-9618+[2001-1458-303-20--100-83]-9618&alias=b9p19p8190.cern.ch&noUDP&sock=slot1_6_5477_cab8_284198>
+...
+040 (11758536.000.000) 06/30 11:46:40 Finished transferring input files
+...
+001 (11758536.000.000) 06/30 11:46:40 Job executing on host: <188.185.193.135:9618?addrs=188.185.193.135-9618+[2001-1458-303-20--100-83]-9618&alias=b9p19p8190.cern.ch&noUDP&sock=startd_4368_a9c4>
+	SlotName: slot1_6@b9p19p8190.cern.ch
+	CondorScratchDir = "/pool/condor/dir_999097"
+	Cpus = 4
+	Disk = 78636
+	GPUs = 0
+	Memory = 12000
+...
+006 (11758536.000.000) 06/30 11:46:55 Image size of job updated: 96756
+	95  -  MemoryUsage of job (MB)
+	96756  -  ResidentSetSize of job (KB)
+...
+006 (11758536.000.000) 06/30 11:47:21 Image size of job updated: 423292
+	101  -  MemoryUsage of job (MB)
+	102772  -  ResidentSetSize of job (KB)
+...
+040 (11758536.000.000) 06/30 11:47:21 Started transferring output files
+...
+040 (11758536.000.000) 06/30 11:47:21 Finished transferring output files
+...
+021 (11758536.000.000) 06/30 11:47:21 Error from starter on slot1_6@b9p19p8190.cern.ch:
+	STARTER at 188.185.193.135 failed to send file(s) to <188.185.70.244:9618>: |Error: reading from file /pool/condor/dir_999097/output_particles.parquet: (errno 2) No such file or directory; SHADOW failed to receive file(s) from <188.185.193.135:44727>
+	Code 13 Subcode 2
+...
+004 (11758536.000.000) 06/30 11:47:21 Job was evicted. Code 12 Subcode 2
+	(0) CPU times
+		Usr 0 00:00:35, Sys 0 00:00:03  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	70363309  -  Run Bytes Received By Job
+	Reason: Transfer output files failure at execution point slot1_6@b9p19p8190.cern.ch while sending files to access point bigbird10. Details: reading from file /pool/condor/dir_999097/output_particles.parquet: (errno 2) No such file or directory
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :        0        4         4 
+	   Disk (KB)            :  1222195    75000     78636 
+	   GPUs                 :                 0         0 
+	   Memory (MB)          :      101    12000     12000 
+	   TimeExecute (s)      :       41                    
+	   TimeSlotBusy (s)     :       47                    
+...
+012 (11758536.000.000) 06/30 11:47:21 Job was held.
+	Transfer output files failure at execution point slot1_6@b9p19p8190.cern.ch while sending files to access point bigbird10. Details: reading from file /pool/condor/dir_999097/output_particles.parquet: (errno 2) No such file or directory
+	Code 12 Subcode 2
+...

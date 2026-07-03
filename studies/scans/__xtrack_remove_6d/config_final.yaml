@@ -1,8 +1,10 @@
 # Configuration for tuning of the collider
 config_collider:
   label: thin
-  lattice_file: /eos/user/t/toppmugg/acc-models-lhc/lhc_thin.json
-  optics_file: /eos/user/t/toppmugg/acc-models-lhc/strengths/cycle_round_v0/opt_150_thin.madx
+  lattice_file: 
+    https://gitlab.cern.ch/acc-models/acc-models-lhc/-/raw/vhl19.4/xsuite/lhc_thin.json
+  optics_file: 
+    https://gitlab.cern.ch/acc-models/acc-models-lhc/-/raw/vhl19.4/strengths/cycle_round_v0/opt_150_thin.madx
 
   # label: thin_test
   # lattice_file: lhc_thin.json
@@ -12,40 +14,35 @@ config_collider:
   # lattice_file: lhc.legacy.json
   # optics_file: opt_150.legacy.madx
 
-  new_knobs: {
+  new_knobs: {p0c: '7e12', on_alice: on_alice_normalized * 7000e9 / energy0_b1, 
+      on_lhcb: on_lhcb_normalized * 7000e9 / energy0_b1, kof.b1: kmax_mo / 
+      imax_mo * i_oct_b1 / brho0_b1, kof.b2: kmax_mo / imax_mo * i_oct_b2 / 
+      brho0_b2, kod.b1: kmax_mo / imax_mo * i_oct_b1 / brho0_b1, kod.b2: kmax_mo
+      / imax_mo * i_oct_b2 / brho0_b2, kof.a12b1: kof.b1, kof.a23b1: kof.b1, 
+      kof.a34b1: kof.b1, kof.a45b1: kof.b1, kof.a56b1: kof.b1, kof.a67b1: kof.b1,
+    kof.a78b1: kof.b1, kof.a81b1: kof.b1, kof.a12b2: kof.b2, kof.a23b2: kof.b2, 
+      kof.a34b2: kof.b2, kof.a45b2: kof.b2, kof.a56b2: kof.b2, kof.a67b2: kof.b2,
+    kof.a78b2: kof.b2, kof.a81b2: kof.b2, kod.a12b1: kod.b1, kod.a23b1: kod.b1, 
+      kod.a34b1: kod.b1, kod.a45b1: kod.b1, kod.a56b1: kod.b1, kod.a67b1: kod.b1,
+    kod.a78b1: kod.b1, kod.a81b1: kod.b1, kod.a12b2: kod.b2, kod.a23b2: kod.b2, 
+      kod.a34b2: kod.b2, kod.a45b2: kod.b2, kod.a56b2: kod.b2, kod.a67b2: kod.b2,
+    kod.a78b2: kod.b2, kod.a81b2: kod.b2
 
-    p0c: 7e12, # Need to change the energy here to have it in the closed-orbit
-              # correction references
-
-    on_alice: on_alice_normalized * 7000e9 / energy0_b1,
-    on_lhcb: on_lhcb_normalized * 7000e9 / energy0_b1,
-
-    # Octupole knobs
-    kof.b1: kmax_mo / imax_mo * i_oct_b1 / brho0_b1,
-    kof.b2: kmax_mo / imax_mo * i_oct_b2 / brho0_b2,
-    kod.b1: kmax_mo / imax_mo * i_oct_b1 / brho0_b1,
-    kod.b2: kmax_mo / imax_mo * i_oct_b2 / brho0_b2,
-    kof.a12b1: kof.b1,  kof.a23b1: kof.b1,  kof.a34b1: kof.b1,  kof.a45b1: kof.b1,
-    kof.a56b1: kof.b1,  kof.a67b1: kof.b1,  kof.a78b1: kof.b1,  kof.a81b1: kof.b1,
-    kof.a12b2: kof.b2,  kof.a23b2: kof.b2,  kof.a34b2: kof.b2,  kof.a45b2: kof.b2,
-    kof.a56b2: kof.b2,  kof.a67b2: kof.b2,  kof.a78b2: kof.b2,  kof.a81b2: kof.b2,
-    kod.a12b1: kod.b1,  kod.a23b1: kod.b1,  kod.a34b1: kod.b1,  kod.a45b1: kod.b1,
-    kod.a56b1: kod.b1,  kod.a67b1: kod.b1,  kod.a78b1: kod.b1,  kod.a81b1: kod.b1,
-    kod.a12b2: kod.b2,  kod.a23b2: kod.b2,  kod.a34b2: kod.b2,  kod.a45b2: kod.b2,
-    kod.a56b2: kod.b2,  kod.a67b2: kod.b2,  kod.a78b2: kod.b2,  kod.a81b2: kod.b2
-
-  }
+}
 
   apply_multipolar_errors:
-    on_error_arc: '../hllhc_prepare_multipolar_errors/multipole_errors_pre_hllhc/multipole_errors_arc.json'
-    on_error_triplets_ir15: '../hllhc_prepare_multipolar_errors/multipole_errors_hllhc_ir15/multipole_errors_inner_triplet_d1_ir15.json'
-    on_error_d2_ir15: '../hllhc_prepare_multipolar_errors/multipole_errors_hllhc_ir15/multipole_errors_d2_ir15.json'
+    on_error_arc: 
+      ../hllhc_prepare_multipolar_errors/multipole_errors_pre_hllhc/multipole_errors_arc.json
+    on_error_triplets_ir15: 
+      ../hllhc_prepare_multipolar_errors/multipole_errors_hllhc_ir15/multipole_errors_inner_triplet_d1_ir15.json
+    on_error_d2_ir15: 
+      ../hllhc_prepare_multipolar_errors/multipole_errors_hllhc_ir15/multipole_errors_d2_ir15.json
     _config_:
       min_order: 0
       max_order: 15
 
   knob_settings:
-    p0c: 7e12              # beam energy
+    p0c: '7e12'            # beam energy
     # Orbit knobs
     on_x1hs: 250           # [urad]
     on_sep1v: 0            # [mm]
@@ -53,9 +50,9 @@ config_collider:
     on_sep2h: 0.138        # [mm]
     on_x5vs: 250           # [urad]
     on_sep5h: 0            # [mm]
-    on_x8v: -200           # [urad]
+    on_x8v: 170            # [urad]
     on_sep8h: -0.043       # [mm]
-    on_sep8v: -0.01        # [mm]
+    on_sep8v: 0.01         # [mm]
 
     on_disp: 1.
     on_dx1hs: on_x1hs*on_disp
@@ -80,8 +77,8 @@ config_collider:
     lagrf400.b2: 0.         # [rad]
 
     # Octupoles
-    i_oct_b1: -235          # [A]
-    i_oct_b2: -235          # [A]
+    i_oct_b1: -60.0         # [A]
+    i_oct_b2: -60.0         # [A]
 
     # No linear errors
     on_error_arc_k0: 0
@@ -110,85 +107,95 @@ config_collider:
         max_PU: 160
     ip2:
       separation_in_sigmas: 5
-      plane: 'x'
+      plane: x
       impose_separation_orthogonal_to_crossing: false
       knobs:
-        - on_sep2h
+      - on_sep2h
       bump_range:
         b1:
-          - e.ds.l2.b1
-          - s.ds.r2.b1
+        - e.ds.l2.b1
+        - s.ds.r2.b1
         b2:
-          - s.ds.r2.b2
-          - e.ds.l2.b2
+        - s.ds.r2.b2
+        - e.ds.l2.b2
       preserve_angles_at_ip: true
       preserve_bump_closure: true
       corrector_knob_names:
         # to preserve angles at ip
-        - corr_co_acbyvs4.l2b1
-        - corr_co_acbyhs4.l2b1
-        - corr_co_acbyvs4.r2b2
-        - corr_co_acbyhs4.r2b2
+      - corr_co_acbyvs4.l2b1
+      - corr_co_acbyhs4.l2b1
+      - corr_co_acbyvs4.r2b2
+      - corr_co_acbyhs4.r2b2
         # to close the bumps
-        - corr_co_acbyvs4.l2b2
-        - corr_co_acbyhs4.l2b2
-        - corr_co_acbyvs4.r2b1
-        - corr_co_acbyhs4.r2b1
-        - corr_co_acbyhs5.l2b2
-        - corr_co_acbyvs5.l2b2
-        - corr_co_acbchs5.r2b1
-        - corr_co_acbcvs5.r2b1
+      - corr_co_acbyvs4.l2b2
+      - corr_co_acbyhs4.l2b2
+      - corr_co_acbyvs4.r2b1
+      - corr_co_acbyhs4.r2b1
+      - corr_co_acbyhs5.l2b2
+      - corr_co_acbyvs5.l2b2
+      - corr_co_acbchs5.r2b1
+      - corr_co_acbcvs5.r2b1
 
     ip8:
       luminosity: 2.0e+33
       num_colliding_bunches: 2572
       impose_separation_orthogonal_to_crossing: true
       knobs:
-        - on_sep8h
-        - on_sep8v
+      - on_sep8h
+      - on_sep8v
       bump_range:
         b1:
-          - e.ds.l8.b1
-          - s.ds.r8.b1
+        - e.ds.l8.b1
+        - s.ds.r8.b1
         b2:
-          - s.ds.r8.b2
-          - e.ds.l8.b2
+        - s.ds.r8.b2
+        - e.ds.l8.b2
       preserve_angles_at_ip: true
       preserve_bump_closure: true
       corrector_knob_names:
         # to preserve angles at ip
-        - corr_co_acbyvs4.l8b1
-        - corr_co_acbyhs4.l8b1
-        - corr_co_acbyvs4.r8b2
-        - corr_co_acbyhs4.r8b2
+      - corr_co_acbyvs4.l8b1
+      - corr_co_acbyhs4.l8b1
+      - corr_co_acbyvs4.r8b2
+      - corr_co_acbyhs4.r8b2
         # to close the bumps
-        - corr_co_acbyvs4.l8b2
-        - corr_co_acbyhs4.l8b2
-        - corr_co_acbyvs4.r8b1
-        - corr_co_acbyhs4.r8b1
-        - corr_co_acbcvs5.l8b2
-        - corr_co_acbchs5.l8b2
-        - corr_co_acbyvs5.r8b1
-        - corr_co_acbyhs5.r8b1
+      - corr_co_acbyvs4.l8b2
+      - corr_co_acbyhs4.l8b2
+      - corr_co_acbyvs4.r8b1
+      - corr_co_acbyhs4.r8b1
+      - corr_co_acbcvs5.l8b2
+      - corr_co_acbchs5.l8b2
+      - corr_co_acbyvs5.r8b1
+      - corr_co_acbyhs5.r8b1
 
 
+    lumi_leveling:
+      ip1_5:
+        skip_leveling: false
+        luminosity: 5e+34
+        num_colliding_bunches: 1960
+        vary:
+        - num_particles_per_bunch
+        constraints:
+          max_intensity: '2.3e11'
+          max_PU: 160
   knobs_to_zero_for_flat_orbit:
-    - on_x1hs
-    - on_sep1v
-    - on_x2v
-    - on_sep2h
-    - on_x5vs
-    - on_sep5h
-    - on_x8v
-    - on_sep8h
-    - on_sep8v
-    - on_disp
-    - on_dx1hs
-    - on_dsep1v
-    - on_dx5vs
-    - on_dsep5h
-    - on_crab1
-    - on_crab5
+  - on_x1hs
+  - on_sep1v
+  - on_x2v
+  - on_sep2h
+  - on_x5vs
+  - on_sep5h
+  - on_x8v
+  - on_sep8h
+  - on_sep8v
+  - on_disp
+  - on_dx1hs
+  - on_dsep1v
+  - on_dx5vs
+  - on_dsep5h
+  - on_crab1
+  - on_crab5
 
   beam_beam:
     install_beam_beam: true
@@ -199,30 +206,30 @@ config_collider:
       ip2: 20
       ip5: 25
       ip8: 20
-    sigma_z: 0.076
+    sigma_z: 0.0761
     num_particles_per_bunch: 2.2e11
     nemitt_x: 2.5e-6
     nemitt_y: 2.5e-6
     mask_with_filling_pattern:
       pattern_fname: 
-        /afs/cern.ch/work/t/toppmugg/private/DA_HL19/studies/filling_scheme/8b4e_1972b_1960_1178_1886_224bpi_12inj_800ns_bs200ns.json
-      i_bunch_b1: 1963 # If not specified, the bunch with the worst schedule is chosen
-      i_bunch_b2: 1963 # Same. A value for i_bunch_b1 and i_bunch_b2 must be specified if pattern_fname is specified
+        /afs/cern.ch/work/t/toppmugg/private/DA_HL19/studies/filling_scheme/25ns_2760b_2748_2492_2574_288bpi_13inj_800ns_bs200ns.json
+      i_bunch_b1: 150  # If not specified, the bunch with the worst schedule is chosen
+      i_bunch_b2: 150  # Same. A value for i_bunch_b1 and i_bunch_b2 must be specified if pattern_fname is specified
 
 
   tuning:
     qx:
-      b1: 62.31
-      b2: 62.31
+      b1: 62.305
+      b2: 62.305
     qy:
-      b1: 60.32
-      b2: 60.32
+      b1: 60.312
+      b2: 60.312
     dqx:
-      b1: 5
-      b2: 5
+      b1: 15
+      b2: 15
     dqy:
-      b1: 6
-      b2: 6
+      b1: 15
+      b2: 15
 
     knob_names:
       b1:
@@ -241,19 +248,20 @@ config_collider:
         c_minus_knob_2: cmis.b2_op
 
     steps:
-      q_knob: 1e-4
-      dq_knob: 1e-3
-      c_minus_knob: 1e-5
+      q_knob: '1e-4'
+      dq_knob: '1e-3'
+      c_minus_knob: '1e-5'
 
     tolerances:
-      tune: 1e-4
+      tune: '1e-4'
       chromaticity: 0.05
-      c_minus: 2e-4
+      c_minus: '2e-4'
 
     closed_orbit_correction:
       b1: correction/corr_co_b1.json
       b2: correction/corr_co_b2.json
 
+    delta_cmr: 0.001
   ir_corrections:
     ip1:
       range_b1: [bptdv.a4l1.b1, bptdh.a4r1.b1]
@@ -354,28 +362,36 @@ config_collider:
           target_quantities_b2: {f1050_b2: f1050}
           feed_down: false
 
+  ver_hllhc_optics: 1.9
+  skip_leveling: false
 config_simulation:
   # Collider file
-  collider_file: ../1_build_distr_and_collider/collider.json.zip
+  collider_file: ../collider.json.zip
 
   # Distribution in the normalized xy space
-  particle_file: ../1_build_distr_and_collider/particles/00.parquet
+  particle_file: ../particles/00.parquet
 
   # Initial off-momentum
   delta_max: 27.e-5
 
   # Tracking
-  n_turns: 1000 # number of turns to track
+  n_turns: 1000000 # number of turns to track
 
   # Beam to track
-  beam: lhcb1 #lhcb1 or lhcb2
+  beam: b1    #lhcb1 or lhcb2
 
 # Save collider or not
+  tol_qx: 0.0001
+  tol_qy: 0.0001
+  tol_dqx: 0.05
+  tol_dqy: 0.05
+  tol_cminus: 0.001
+  tol_qknobs_step: 1e-06
 dump_collider: false
 dump_config_in_collider: false
 
 # Context for the simulation
-context: "cpu" # 'cupy' # opencl
+context: cpu   # 'cupy' # opencl
 
 # Device number for GPU simulation
 device_number: # 0

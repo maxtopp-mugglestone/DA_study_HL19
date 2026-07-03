@@ -1,6 +1,7 @@
+ver_hllhc_optics: 1.9
 label: thin
-lattice_file: /eos/user/t/toppmugg/acc-models-lhc/lhc_thin.json
-optics_file: /eos/user/t/toppmugg/acc-models-lhc/strengths/cycle_round_v0/opt_150_thin.madx
+lattice_file: https://gitlab.cern.ch/acc-models/acc-models-lhc/-/raw/vhl19.4/xsuite/lhc_thin.json
+optics_file: /afs/cern.ch/work/t/toppmugg/private/DA_HL19/optics/flat/opt_180_75_v0_thin.madx
 
 # label: thin_test
 # lattice_file: lhc_thin.json
@@ -51,9 +52,9 @@ knob_settings:
   on_sep2h: 0.138        # [mm]
   on_x5vs: 250           # [urad]
   on_sep5h: 0            # [mm]
-  on_x8v: -200           # [urad]
+  on_x8v: 170           # [urad]
   on_sep8h: -0.043       # [mm]
-  on_sep8v: -0.01        # [mm]
+  on_sep8v: 0.01        # [mm]
 
   on_disp: 1.
   on_dx1hs: on_x1hs*on_disp
@@ -78,8 +79,8 @@ knob_settings:
   lagrf400.b2: 0.         # [rad]
 
   # Octupoles
-  i_oct_b1: -235          # [A]
-  i_oct_b2: -235          # [A]
+  i_oct_b1: -60.0          # [A]
+  i_oct_b2: -60.0          # [A]
 
   # No linear errors
   on_error_arc_k0: 0
@@ -97,6 +98,16 @@ knob_settings:
 
 skip_leveling: false
 lumi_leveling:
+  lumi_leveling:
+    ip1_5:
+      skip_leveling: false
+      luminosity: 5.0e+34
+      num_colliding_bunches: 1960 # This will be set automatically according to the filling scheme
+      vary:
+      - num_particles_per_bunch
+      constraints:
+        max_intensity: 2.3e11
+        max_PU: 160
   ip2:
     separation_in_sigmas: 5
     plane: 'x'
@@ -188,15 +199,15 @@ beam_beam:
     ip2: 20
     ip5: 25
     ip8: 20
-  sigma_z: 0.076
+  sigma_z: 0.0761
   num_particles_per_bunch: 2.2E+11
   nemitt_x: 2.5e-6
   nemitt_y: 2.5e-6
   mask_with_filling_pattern:
-  pattern_fname: 
-    /afs/cern.ch/work/t/toppmugg/private/DA_HL19/studies/filling_scheme/8b4e_1972b_1960_1178_1886_224bpi_12inj_800ns_bs200ns.json
-  i_bunch_b1: 1963 # If not specified, the bunch with the worst schedule is chosen
-  i_bunch_b2: 1963 # Same. A value for i_bunch_b1 and i_bunch_b2 must be specified if pattern_fname is specified
+    pattern_fname: 
+      /afs/cern.ch/work/t/toppmugg/private/DA_HL19/studies/filling_scheme/25ns_2760b_2748_2492_2574_288bpi_13inj_800ns_bs200ns.json
+    i_bunch_b1: 150 #150 # If not specified, the bunch with the worst schedule is chosen
+    i_bunch_b2: 150 #150 # Same. A value for i_bunch_b1 and i_bunch_b2 must be specified if pattern_fname is specified
 
 tuning:
   qx:
@@ -211,6 +222,7 @@ tuning:
   dqy:
     b1: 15
     b2: 15
+  delta_cmr: 0.001
 
   knob_names:
     b1:

@@ -162,6 +162,8 @@ def get_title_from_conf(
             bet2 = r"$\beta^{*}_{y,1}$"
         if betx is not None and bety is not None:
             beta = bet1 + f"$= {{{betx}}}$" + " m, " + bet2 + f"$= {{{bety}}}$" + " m"
+        else:
+            beta = "not set"
 
         # Crossing angle at IP1/5
         if "flathv" in conf_mad["config_collider"]["optics_file"] or type_crossing == "flathv":

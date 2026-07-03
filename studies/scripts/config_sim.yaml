@@ -32,10 +32,12 @@
       job_executable: 2_configure_and_track.py # has to be a python file
       files_to_clone:
         - gen_config_orbit_correction.py
+        - lumilocal.py
       files_to_copy_node:
         - 2_configure_and_track.py
         - config.yaml
         - gen_config_orbit_correction.py
+        - lumilocal.py
         - "/afs/cern.ch/work/t/toppmugg/private/DA_HL19/studies/filling_scheme"
         - "../config_gen1.yaml"
         - "../collider.json.zip"

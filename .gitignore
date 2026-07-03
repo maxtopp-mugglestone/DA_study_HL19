@@ -33,6 +33,18 @@ studies/scans/**/tree_maker.log
 # filling_schemes
 !studies/filling_scheme/*
 
+# optics
+optics/*
+
+# notebooks
+*.ipynb
+
+# plots
+*.pdf
+
+# logs
+*.logs
+
 # misc
 da-study-docker_latest.sif
 

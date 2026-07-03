@@ -105,6 +105,15 @@ config_collider:
 
 
   lumi_leveling:
+    ip1_5:
+      skip_leveling: false
+      luminosity: 5.0e+34
+      num_colliding_bunches: 1960 # This will be set automatically according to the filling scheme
+      vary:
+      - num_particles_per_bunch
+      constraints:
+        max_intensity: 2.3e11
+        max_PU: 160
     ip2:
       separation_in_sigmas: 5
       plane: 'x'
@@ -247,8 +256,8 @@ config_collider:
       c_minus: 2e-4
 
     closed_orbit_correction:
-      b1: corr_co_b1.json
-      b2: corr_co_b2.json
+      b1: correction/corr_co_b1.json
+      b2: correction/corr_co_b2.json
 
   ir_corrections:
     ip1:
