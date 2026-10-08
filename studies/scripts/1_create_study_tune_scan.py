@@ -167,7 +167,7 @@ set_context(children, 1, config)
 # --- Build tree and write it to the filesystem
 # ==================================================================================================
 # Define study name
-study_name = "ts_eol_hl19_round_v4"
+study_name = "example_tune_scan"
 
 # Creade folder that will contain the tree
 if not os.path.exists(f"../scans/{study_name}"):

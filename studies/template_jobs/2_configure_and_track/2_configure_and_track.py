@@ -363,7 +363,7 @@ def level_collider(lhc, config):
         try:
             bunch_intensity = lumilocal.luminosity_leveling_ip1_5(
                 collider,
-                config_collider,
+                config,
                 config_bb,
                 crab=crab,
             )
@@ -397,16 +397,16 @@ def level_collider(lhc, config):
             knob_names=knob_names, targets=targets)
             # Update configuration
     config_bb["num_particles_per_bunch_before_optimization"] = float(initial_I)
-    config_collider["lumi_leveling"]["ip2"]["final_on_sep2h"] = float(
+    config["lumi_leveling"]["ip2"]["final_on_sep2h"] = float(
         collider.vars["on_sep2h"]._value
     )
-    config_collider["lumi_leveling"]["ip2"]["final_on_sep2v"] = float(
+    config["lumi_leveling"]["ip2"]["final_on_sep2v"] = float(
         collider.vars["on_sep2v"]._value
     )
-    config_collider["lumi_leveling"]["ip8"]["final_on_sep8h"] = float(
+    config["lumi_leveling"]["ip8"]["final_on_sep8h"] = float(
         collider.vars["on_sep8h"]._value
     )
-    config_collider["lumi_leveling"]["ip8"]["final_on_sep8v"] = float(
+    config["lumi_leveling"]["ip8"]["final_on_sep8v"] = float(
         collider.vars["on_sep8v"]._value
     )
 
@@ -511,7 +511,7 @@ def assert_tune_chroma_coupling(collider, config_collider):
             f"linear coupling is not correct for {line_name}. Expected"
             f" {conf_tuning['delta_cmr']}, got {tw.c_minus}"
         )
-        return results
+    return results
 
 
 print("=== Final verification ===")
@@ -780,4 +780,7 @@ particles_df = process_and_save_results(
     config_gen_1, config_gen_2
  )
 print('Tracking results processed and saved.')
+
+#tag end of job
+tree_maker_tagging(config_gen_2, tag="completed")
 

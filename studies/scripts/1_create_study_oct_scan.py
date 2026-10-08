@@ -77,7 +77,7 @@ dump_config_in_collider = False
 # optimal DA (e.g. tune, chroma, etc).
 # ==================================================================================================
 # Scan tune with step of 0.001 (need to round to correct for numpy numerical instabilities)
-array_qx = np.round(np.arange(62.305, 62.330, 0.001), decimals=4)
+array_qx = np.round(np.arange(62.305, 62.321, 0.001), decimals=4)
 array_I = np.linspace(-600, 600, 50, endpoint=True)
 
 # In case one is doing a tune-tune scan, to decrease the size of the scan, we can ignore the
@@ -160,7 +160,7 @@ set_context(children, 1, config)
 # --- Build tree and write it to the filesystem
 # ==================================================================================================
 # Define study name
-study_name = "os_eol_hl19_flat_180_75_dQ15"
+study_name = "example_oct_scan"
 
 # Creade folder that will contain the tree
 if not os.path.exists(f"../scans/{study_name}"):

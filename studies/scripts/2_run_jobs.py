@@ -541,7 +541,7 @@ class ClusterSubmission:
 # ==================================================================================================
 # --- Main submission function
 # ==================================================================================================
-def submit_jobs_generation(root, generation=1):
+def submit_jobs_generation(root, generation=1, nodes = None):
     # Define a dictionnary that associates a name to each generation number
     dic_int_to_str = {1: "first", 2: "second", 3: "third", 4: "fourth", 5: "fifth"}
     if generation not in dic_int_to_str:
@@ -553,8 +553,48 @@ def submit_jobs_generation(root, generation=1):
     cluster_submission = ClusterSubmission(
         config_generation, root.get_abs_path(), root, singularity_image)
     path_file = f"../submission_files/{dic_int_to_str[generation]}_generation.sub"
+    
+    if nodes is None:
+        nodes = root.generation(generation)
+
     l_filenames, l_path_jobs = cluster_submission.write_sub_files(
-        root.generation(generation), path_file
+        nodes, path_file
+    )
+    cluster_submission.submit(l_filenames, l_path_jobs)
+
+def resubmit_missing_outputs(study_name, generation=2):
+    '''
+    Check and resubmit any nodes without output_particles.parquet file.
+    This should be handled automatically via tree maker tagging, but this function can be called in case that approach fails. 
+    '''
+    # Add suffix to the root node path to handle scans that are not in the root directory
+    fix = f"/../scans/{study_name}"
+    root = tree_maker.tree_from_json(f"{fix[1:]}/tree_maker.json")
+    root.add_suffix(suffix=fix)
+    print("SUBMITTING UNCOMPLETED JOBS ONLY")
+    # Define a dictionnary that associates a name to each generation number
+    dic_int_to_str = {1: "first", 2: "second", 3: "third", 4: "fourth", 5: "fifth"}
+    if generation not in dic_int_to_str:
+        raise ValueError(f"Error: Generation {generation} is not implemented")
+
+    # Submit all the pending jobs of a given generation
+    config_generation = root.parameters["generations"][f"{generation}"]
+    singularity_image = root.parameters["generations"][str(generation)]["singularity_image"]
+    generation_nodes = root.generation(generation)
+    incomplete = []
+    for node in generation_nodes:
+        try:
+            if 'output_particles.parquet' in os.listdir(node.get_abs_path()):
+                print("Node " + str(node) + " completed.")
+            else:
+                incomplete.append(node)
+        except:
+            print("Node not found: "+str(node))
+    cluster_submission = ClusterSubmission(
+        config_generation, root.get_abs_path(), root, singularity_image)
+    path_file = f"../submission_files/{dic_int_to_str[generation]}_generation.sub"
+    l_filenames, l_path_jobs = cluster_submission.write_sub_files(
+        incomplete, path_file
     )
     cluster_submission.submit(l_filenames, l_path_jobs)
 
@@ -578,15 +618,22 @@ def submit_jobs(study_name, print_uncompleted_jobs=False):
             print("Generation 1 is already completed.")
 
         # Check generation 2
-        gen_2_completed = all([node.has_been("completed") for node in root.generation(2)])
-        if gen_1_completed and not gen_2_completed:
-            print("######## Taking care of generation 2 ########")
-            submit_jobs_generation(root, generation=2)
+        gen_2_nodes = root.generation(2)
+        gen_2_incomplete = [
+            node for node in gen_2_nodes
+            if node.has_not_been("completed")
+        ]
+        if gen_1_completed:
+            if not gen_2_incomplete:
+                print("Generation 2 is already completed.")
+            else:
+                print("######## Taking care of generation 2 ########")
+                if len(gen_2_incomplete) != len(gen_2_nodes):
+                    print(f"######## {len(gen_2_incomplete)}/{len(gen_2_nodes)} not completed: resubmitting ########")
+                submit_jobs_generation(root, generation=2,nodes=gen_2_incomplete)
         else:
             if not gen_1_completed:
                 pass
-            else:
-                print("Generation 2 is already completed.")
 
         # We assume there's no generation 3
         if all([descendant.has_been("completed") for descendant in root.descendants]):
@@ -605,7 +652,8 @@ def submit_jobs(study_name, print_uncompleted_jobs=False):
 # ==================================================================================================
 # Load the tree from a yaml and submit the jobs that haven't been completed yet
 if __name__ == "__main__":
-    # Define study
-    study_name = "os_eol_hl19_flat_180_75_dQ15"
-    # Submit jobs
-    submit_jobs(study_name)
+    study_list = ["example_tune_scan","example_oct_scan"] #list of all created studies to be submitted 
+    for study_name in study_list:
+        # Submit jobs
+        submit_jobs(study_name)
+        #submit_uncompleted_jobs(study_name) # to be used in case of unexpected failure modes (will rerun any jobs with no output file but flagged as completed)

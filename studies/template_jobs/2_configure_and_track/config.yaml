@@ -101,13 +101,13 @@ config_collider:
   lumi_leveling:
     ip1_5:
       skip_leveling: false
-      luminosity: 5.0e+34
+      luminosity: 10.0e+34
       num_colliding_bunches: 1960 # This will be set automatically according to the filling scheme
       vary:
       - num_particles_per_bunch
       constraints:
         max_intensity: 2.3e11
-        max_PU: 160
+        max_PU: 180
     ip2:
       separation_in_sigmas: 5
       plane: 'x'

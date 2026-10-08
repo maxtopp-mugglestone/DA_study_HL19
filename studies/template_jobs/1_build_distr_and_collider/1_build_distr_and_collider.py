@@ -243,15 +243,13 @@ def build_distr_and_collider(config_file="config.yaml"):
     # Write particle distribution to file
     write_particle_distribution(particle_list)
 
-    # Build collider from mad model
+    # Build collider
     collider = build_collider_xsuite(config_collider, sanity_checks)
-
-    # Clean temporary files
     collider_co_ref = build_closed_orbit_reference(collider)
 
     # Save collider to json
     collider.to_json("collider.json")
-    collider.to_json("collider_co_ref.json")
+    collider_co_ref.to_json("collider_co_ref.json")
 
     # Compress the collider file to zip to ease the load on afs
     with ZipFile("collider.json.zip", "w") as zipf:
